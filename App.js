@@ -5,7 +5,10 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { THEME, COLORS } from "./config";
 import { SupabaseProvider } from "./contexts/SupabaseContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { OnboardingProvider, useOnboarding } from "./contexts/OnboardingContext";
+import {
+    OnboardingProvider,
+    useOnboarding,
+} from "./contexts/OnboardingContext";
 import { UserSettingsProvider } from "./contexts/UserSettingsContext";
 import { GmailProvider } from "./contexts/GmailContext";
 import { DataProvider } from "./contexts/DataContext";

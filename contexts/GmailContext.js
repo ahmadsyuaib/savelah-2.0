@@ -59,7 +59,9 @@ export const GmailProvider = ({ children }) => {
 
         if (!tokenResponse.ok) {
             const errorText = await tokenResponse.text();
-            throw new Error(`Failed to exchange Gmail authorization code: ${errorText}`);
+            throw new Error(
+                `Failed to exchange Gmail authorization code: ${errorText}`
+            );
         }
 
         const tokenJson = await tokenResponse.json();
