@@ -9,4 +9,7 @@ This is the second version of Savelah.
 ## Future plans
 
 -Integrate multiple accounts
--Config file
+
+## FAQs
+
+-   It only gather datas when it is full
