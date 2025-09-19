@@ -8,7 +8,6 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
 import { COLORS } from "../config";
 
 const ManualTransactionModal = ({ visible, onClose, onSubmit }) => {
@@ -52,21 +51,45 @@ const ManualTransactionModal = ({ visible, onClose, onSubmit }) => {
         onClose();
     };
 
+    if (!visible) {
+        return null;
+    }
+
     return (
         <Modal visible={visible} animationType="slide" onRequestClose={handleClose}>
             <ScrollView style={styles.container} contentContainerStyle={styles.content}>
                 <Text style={styles.title}>Create Transaction</Text>
-                <View style={styles.pickerWrapper}>
+                <View style={styles.segmentWrapper}>
                     <Text style={styles.label}>Direction</Text>
-                    <Picker
-                        selectedValue={direction}
-                        onValueChange={setDirection}
-                        style={styles.picker}
-                        dropdownIconColor={COLORS.text}
-                    >
-                        <Picker.Item label="Outgoing" value="outgoing" />
-                        <Picker.Item label="Incoming" value="incoming" />
-                    </Picker>
+                    <View style={styles.segmentGroup}>
+                        {[
+                            { label: "Outgoing", value: "outgoing" },
+                            { label: "Incoming", value: "incoming" },
+                        ].map((option) => {
+                            const isSelected = direction === option.value;
+                            return (
+                                <TouchableOpacity
+                                    key={option.value}
+                                    style={[
+                                        styles.segmentButton,
+                                        isSelected && styles.segmentButtonSelected,
+                                    ]}
+                                    onPress={() => setDirection(option.value)}
+                                    accessibilityRole="button"
+                                    accessibilityState={{ selected: isSelected }}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.segmentText,
+                                            isSelected && styles.segmentTextSelected,
+                                        ]}
+                                    >
+                                        {option.label}
+                                    </Text>
+                                </TouchableOpacity>
+                            );
+                        })}
+                    </View>
                 </View>
                 <Text style={styles.label}>Amount (SGD)</Text>
                 <TextInput
@@ -146,13 +169,30 @@ const styles = StyleSheet.create({
         borderColor: COLORS.border,
         marginBottom: 16,
     },
-    pickerWrapper: {
+    segmentWrapper: {
         marginBottom: 16,
     },
-    picker: {
-        color: COLORS.text,
+    segmentGroup: {
+        flexDirection: "row",
         backgroundColor: COLORS.surface,
         borderRadius: 12,
+        padding: 4,
+    },
+    segmentButton: {
+        flex: 1,
+        paddingVertical: 10,
+        borderRadius: 8,
+        alignItems: "center",
+    },
+    segmentButtonSelected: {
+        backgroundColor: COLORS.accent,
+    },
+    segmentText: {
+        color: COLORS.subText,
+        fontWeight: "600",
+    },
+    segmentTextSelected: {
+        color: COLORS.text,
     },
     buttonRow: {
         flexDirection: "row",
