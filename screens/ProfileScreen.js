@@ -7,9 +7,16 @@ const ProfileScreen = () => {
     const { user, signOut } = useAuth();
     const { resetOnboarding } = useOnboarding();
 
+    const handleSignOut = async () => {
+        try {
+            await signOut();
+        } finally {
+            await resetOnboarding();
+        }
+    };
+
     const handleReset = async () => {
-        await resetOnboarding();
-        await signOut();
+        await handleSignOut();
     };
 
     return (
@@ -28,7 +35,7 @@ const ProfileScreen = () => {
             <TouchableOpacity style={styles.button}>
                 <Text style={styles.buttonText}>App Settings</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
+            <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
                 <Text style={styles.signOutText}>Sign Out</Text>
             </TouchableOpacity>
         </View>

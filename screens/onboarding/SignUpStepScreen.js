@@ -10,10 +10,11 @@ import {
 import { useAuth } from "../../contexts/AuthContext";
 import { COLORS } from "../../config";
 
-const AuthStepScreen = ({ navigation }) => {
-    const { user, signIn, loading } = useAuth();
+const SignUpStepScreen = ({ navigation }) => {
+    const { user, signUp, loading } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
@@ -24,12 +25,16 @@ const AuthStepScreen = ({ navigation }) => {
     }, [navigation, user]);
 
     const handleSubmit = async () => {
+        if (password !== confirmPassword) {
+            setError("Passwords do not match");
+            return;
+        }
+
         setSubmitting(true);
         setError(null);
         try {
-            const payload = { email, password };
-            const { error: signInError } = await signIn(payload);
-            if (signInError) throw signInError;
+            const { error: signUpError } = await signUp({ email, password });
+            if (signUpError) throw signUpError;
         } catch (err) {
             setError(err.message);
         } finally {
@@ -39,7 +44,7 @@ const AuthStepScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Sign in with Supabase</Text>
+            <Text style={styles.title}>Create your account</Text>
             <TextInput
                 style={styles.input}
                 placeholder="Email"
@@ -57,6 +62,14 @@ const AuthStepScreen = ({ navigation }) => {
                 value={password}
                 onChangeText={setPassword}
             />
+            <TextInput
+                style={styles.input}
+                placeholder="Confirm Password"
+                placeholderTextColor={COLORS.subText}
+                secureTextEntry
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+            />
             {error ? <Text style={styles.error}>{error}</Text> : null}
             <TouchableOpacity
                 style={styles.button}
@@ -66,16 +79,14 @@ const AuthStepScreen = ({ navigation }) => {
                 {submitting ? (
                     <ActivityIndicator color={COLORS.text} />
                 ) : (
-                    <Text style={styles.buttonText}>Sign In</Text>
+                    <Text style={styles.buttonText}>Create Account</Text>
                 )}
             </TouchableOpacity>
             <TouchableOpacity
                 style={styles.switcher}
-                onPress={() => navigation.navigate("SignUpStep")}
+                onPress={() => navigation.goBack()}
             >
-                <Text style={styles.switcherText}>
-                    Don't have an account? Sign up
-                </Text>
+                <Text style={styles.switcherText}>Already have an account? Sign in</Text>
             </TouchableOpacity>
         </View>
     );
@@ -126,4 +137,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default AuthStepScreen;
+export default SignUpStepScreen;
