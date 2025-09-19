@@ -1,5 +1,6 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AuthStepScreen from "../screens/onboarding/AuthStepScreen";
+import SignUpStepScreen from "../screens/onboarding/SignUpStepScreen";
 import EmailStepScreen from "../screens/onboarding/EmailStepScreen";
 import NotificationsStepScreen from "../screens/onboarding/NotificationsStepScreen";
 import SupabaseStepScreen from "../screens/onboarding/SupabaseStepScreen";
@@ -19,6 +20,11 @@ const OnboardingNavigator = () => (
             name="AuthStep"
             component={AuthStepScreen}
             options={{ title: "Welcome" }}
+        />
+        <Stack.Screen
+            name="SignUpStep"
+            component={SignUpStepScreen}
+            options={{ title: "Create Account" }}
         />
         <Stack.Screen
             name="EmailStep"
