@@ -37,8 +37,10 @@ const ManualTransactionModal = ({ visible, onClose, onSubmit }) => {
             direction,
             amount: numericAmount,
             description: description || "Manual Transaction",
-            from_account: fromAccount || (direction === "incoming" ? "Unknown" : "Me"),
-            to_account: toAccount || (direction === "incoming" ? "Me" : "Unknown"),
+            from_account:
+                fromAccount || (direction === "incoming" ? "Unknown" : "Me"),
+            to_account:
+                toAccount || (direction === "incoming" ? "Me" : "Unknown"),
             mode_of_payment: mode,
             transacted_at: new Date().toISOString(),
             source: "manual",
@@ -52,9 +54,20 @@ const ManualTransactionModal = ({ visible, onClose, onSubmit }) => {
         onClose();
     };
 
+    if (!visible) {
+        return null;
+    }
+
     return (
-        <Modal visible={visible} animationType="slide" onRequestClose={handleClose}>
-            <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <Modal
+            visible={visible}
+            animationType="slide"
+            onRequestClose={handleClose}
+        >
+            <ScrollView
+                style={styles.container}
+                contentContainerStyle={styles.content}
+            >
                 <Text style={styles.title}>Create Transaction</Text>
                 <View style={styles.pickerWrapper}>
                     <Text style={styles.label}>Direction</Text>
@@ -106,10 +119,16 @@ const ManualTransactionModal = ({ visible, onClose, onSubmit }) => {
                     onChangeText={setMode}
                 />
                 <View style={styles.buttonRow}>
-                    <TouchableOpacity style={styles.cancelButton} onPress={handleClose}>
+                    <TouchableOpacity
+                        style={styles.cancelButton}
+                        onPress={handleClose}
+                    >
                         <Text style={styles.cancelText}>Cancel</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                    <TouchableOpacity
+                        style={styles.submitButton}
+                        onPress={handleSubmit}
+                    >
                         <Text style={styles.submitText}>Save</Text>
                     </TouchableOpacity>
                 </View>
