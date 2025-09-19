@@ -1,9 +1,6 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import { createSupabaseClient } from "../lib/supabaseClient";
-import {
-    DEFAULT_SUPABASE_ANON_KEY,
-    DEFAULT_SUPABASE_URL,
-} from "../config";
+import { DEFAULT_SUPABASE_ANON_KEY, DEFAULT_SUPABASE_URL } from "../config";
 
 const SupabaseContext = createContext(null);
 
@@ -12,6 +9,9 @@ export const SupabaseProvider = ({ children }) => {
         url: DEFAULT_SUPABASE_URL,
         anonKey: DEFAULT_SUPABASE_ANON_KEY,
     });
+
+    // console.log("🧩 Supabase url: ", config.url);
+    // console.log("🧩 Supabase anon key: ", config.anonKey);
 
     const supabase = useMemo(
         () => createSupabaseClient(config.url, config.anonKey),

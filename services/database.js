@@ -2,8 +2,12 @@ import { MONTH_RESET_DAY } from "../config";
 
 export const getCurrentMonthRange = () => {
     const now = new Date();
-    const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), MONTH_RESET_DAY));
-    const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, MONTH_RESET_DAY));
+    const start = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), MONTH_RESET_DAY)
+    );
+    const end = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, MONTH_RESET_DAY)
+    );
     return { start, end };
 };
 
@@ -89,15 +93,18 @@ export const createCategory = async (supabase, userId, payload) => {
         .select()
         .single();
     if (error) {
+        console.warn("🧩 Failed to create category", error);
         throw error;
     }
+    console.log("🧩 Created category: ", data);
     return data;
 };
 
 export const getCategoryUsage = (transactions, categories) => {
     const usageMap = new Map();
     transactions.forEach((transaction) => {
-        if (!transaction.category_id || transaction.direction !== "outgoing") return;
+        if (!transaction.category_id || transaction.direction !== "outgoing")
+            return;
         const amount = Number(transaction.amount) || 0;
         usageMap.set(
             transaction.category_id,
