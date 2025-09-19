@@ -47,3 +47,10 @@ All constants including the color scheme (purple highlights, black background, w
 
 -   Theme colors from config.js
 -   Minimal, clean UI
+
+## To-dos
+
+-   When signing out, return to the sign in page.
+-   For the sign up page, create another page that
+-   Get list of categories from Supabase if not done
+-
