@@ -51,6 +51,4 @@ All constants including the color scheme (purple highlights, black background, w
 ## To-dos
 
 -   When signing out, return to the sign in page.
--   For the sign up page, create another page that
--   Get list of categories from Supabase if not done
--
+-   For the sign up page, create another page that has a confirm password field too
