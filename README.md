@@ -8,7 +8,9 @@ This is the second version of Savelah.
 
 ## Future plans
 
--Integrate multiple accounts
+-   Integrate multiple accounts
+-   Add excel sheet
+-   Post notifications
 
 ## FAQs
 
