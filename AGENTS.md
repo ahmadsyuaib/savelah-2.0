@@ -54,11 +54,5 @@ All constants including the color scheme (purple highlights, black background, w
 
 ## To-dos
 
--   After sign up, for the onboarding, it gets the email used for transactions, whether they want default supabase account and/or the supabase account they will be using for transactions. It then uploads them to Supabase. So, add:
-    (1) "email" they will be using
-    (2) boolean whether they are using default
-    (3) alternate "supabase" url (optional)
-    (4) alternate "supabase" api key (optional)
--   After signing in, it does not have to onboard fully. Only onboard when signing up. The email for transactions should be there already. So it does a Supabase check for the most updated email. Check if they use their own supabase account. If yes, get it and initialise the variables for adding categories and transactions to that. Only have push_notifications turned on, that's all.
--   In the profile screen, add an button to change email used for transactions AKA update supabase.
--   Also, create a readme file called 'TODO.md' with all the things I should do to run the app including the schema for new database to add
+-   For the budget categories, make the categories a clickable. After I click it, I should be able to delete or edit the budget amount which then updates Supabase's category table.
+-   Additionally, the mobile application is supposed to intercept the email. How do I activate this? Add the instructions to the bottom of the TODO.md file. Additionally, I want to test whether it works by sending an email from another gmail account. Help me create some files such that I can test whether it is working. Do it by creating a test parser which I can use currently which receives from emails "timeformetostudy@gmail.com"
