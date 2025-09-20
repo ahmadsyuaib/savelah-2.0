@@ -6,6 +6,9 @@ const STORAGE_KEY = "userSettings";
 const defaultSettings = {
     transactionEmail: "",
     notificationsEnabled: false,
+    useDefaultSupabase: true,
+    customSupabaseUrl: "",
+    customSupabaseAnonKey: "",
 };
 
 const UserSettingsContext = createContext(null);

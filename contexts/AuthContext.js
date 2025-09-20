@@ -1,10 +1,19 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useSupabase } from "./SupabaseContext";
+import { useUserSettings } from "./UserSettingsContext";
+import { useOnboarding } from "./OnboardingContext";
+import {
+    fetchUserProfile,
+    resolveSupabaseConfig,
+    toLocalSettings,
+} from "../services/userProfile";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-    const { supabase } = useSupabase();
+    const { authSupabase, setDataSupabaseConfig } = useSupabase();
+    const { updateSettings } = useUserSettings();
+    const { onboardingComplete, completeOnboarding } = useOnboarding();
     const [session, setSession] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -14,7 +23,7 @@ export const AuthProvider = ({ children }) => {
             setLoading(true);
             const {
                 data: { session: activeSession },
-            } = await supabase.auth.getSession();
+            } = await authSupabase.auth.getSession();
             if (mounted) {
                 setSession(activeSession ?? null);
                 setLoading(false);
@@ -24,7 +33,7 @@ export const AuthProvider = ({ children }) => {
 
         const {
             data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, activeSession) => {
+        } = authSupabase.auth.onAuthStateChange((_event, activeSession) => {
             setSession(activeSession ?? null);
         });
 
@@ -32,18 +41,58 @@ export const AuthProvider = ({ children }) => {
             mounted = false;
             subscription.unsubscribe();
         };
-    }, [supabase]);
+    }, [authSupabase]);
+
+    useEffect(() => {
+        const syncProfile = async () => {
+            if (!session?.user?.id) return;
+
+            try {
+                const profile = await fetchUserProfile(
+                    authSupabase,
+                    session.user.id
+                );
+
+                if (!profile) {
+                    return;
+                }
+
+                const localSettings = toLocalSettings(profile);
+                if (localSettings) {
+                    await updateSettings(localSettings);
+                }
+
+                const config = resolveSupabaseConfig(profile);
+                setDataSupabaseConfig(config);
+
+                if (!onboardingComplete) {
+                    await completeOnboarding();
+                }
+            } catch (error) {
+                console.warn("Failed to synchronise user profile", error);
+            }
+        };
+
+        syncProfile();
+    }, [
+        authSupabase,
+        completeOnboarding,
+        onboardingComplete,
+        session?.user?.id,
+        setDataSupabaseConfig,
+        updateSettings,
+    ]);
 
     const value = useMemo(
         () => ({
             session,
             user: session?.user ?? null,
             loading,
-            signIn: (payload) => supabase.auth.signInWithPassword(payload),
-            signUp: (payload) => supabase.auth.signUp(payload),
-            signOut: () => supabase.auth.signOut(),
+            signIn: (payload) => authSupabase.auth.signInWithPassword(payload),
+            signUp: (payload) => authSupabase.auth.signUp(payload),
+            signOut: () => authSupabase.auth.signOut(),
         }),
-        [session, loading, supabase]
+        [authSupabase, session, loading]
     );
 
     return (

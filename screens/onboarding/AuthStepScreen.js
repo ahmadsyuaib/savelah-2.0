@@ -8,20 +8,22 @@ import {
     View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
+import { useOnboarding } from "../../contexts/OnboardingContext";
 import { COLORS } from "../../config";
 
 const AuthStepScreen = ({ navigation }) => {
     const { user, signIn, loading } = useAuth();
+    const { onboardingComplete } = useOnboarding();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (user) {
+        if (user && !onboardingComplete) {
             navigation.replace("EmailStep");
         }
-    }, [navigation, user]);
+    }, [navigation, onboardingComplete, user]);
 
     const handleSubmit = async () => {
         setSubmitting(true);
