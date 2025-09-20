@@ -1,30 +1,47 @@
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useRef, useState } from "react";
 import { createSupabaseClient } from "../lib/supabaseClient";
 import { DEFAULT_SUPABASE_ANON_KEY, DEFAULT_SUPABASE_URL } from "../config";
 
 const SupabaseContext = createContext(null);
 
 export const SupabaseProvider = ({ children }) => {
-    const [config, setConfig] = useState({
+    const defaultConfig = useMemo(
+        () => ({
+            url: DEFAULT_SUPABASE_URL,
+            anonKey: DEFAULT_SUPABASE_ANON_KEY,
+        }),
+        []
+    );
+
+    const authClientRef = useRef(
+        createSupabaseClient(
+            DEFAULT_SUPABASE_URL,
+            DEFAULT_SUPABASE_ANON_KEY
+        )
+    );
+
+    const [dataConfig, setDataConfig] = useState({
         url: DEFAULT_SUPABASE_URL,
         anonKey: DEFAULT_SUPABASE_ANON_KEY,
     });
 
-    // console.log("🧩 Supabase url: ", config.url);
-    // console.log("🧩 Supabase anon key: ", config.anonKey);
-
     const supabase = useMemo(
-        () => createSupabaseClient(config.url, config.anonKey),
-        [config]
+        () => createSupabaseClient(dataConfig.url, dataConfig.anonKey),
+        [dataConfig]
     );
 
     const value = useMemo(
         () => ({
+            authSupabase: authClientRef.current,
             supabase,
-            supabaseConfig: config,
-            setSupabaseConfig: setConfig,
+            dataSupabase: supabase,
+            supabaseConfig: dataConfig,
+            defaultSupabaseConfig: defaultConfig,
+            setSupabaseConfig: setDataConfig,
+            setDataSupabaseConfig: setDataConfig,
+            resetDataSupabaseConfig: () => setDataConfig(defaultConfig),
         }),
-        [supabase, config]
+        [defaultConfig, supabase, dataConfig]
     );
 
     return (

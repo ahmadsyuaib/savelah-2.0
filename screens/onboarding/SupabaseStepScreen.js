@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     StyleSheet,
@@ -10,31 +10,78 @@ import {
 } from "react-native";
 import { useSupabase } from "../../contexts/SupabaseContext";
 import { useOnboarding } from "../../contexts/OnboardingContext";
-import { COLORS, DEFAULT_SUPABASE_ANON_KEY, DEFAULT_SUPABASE_URL } from "../../config";
+import { COLORS, DEFAULT_SUPABASE_URL } from "../../config";
+import { useAuth } from "../../contexts/AuthContext";
+import { useUserSettings } from "../../contexts/UserSettingsContext";
+import { upsertUserProfile } from "../../services/userProfile";
 
 const SupabaseStepScreen = () => {
-    const { setSupabaseConfig } = useSupabase();
+    const { authSupabase, setDataSupabaseConfig, defaultSupabaseConfig } =
+        useSupabase();
     const { completeOnboarding } = useOnboarding();
-    const [useCustom, setUseCustom] = useState(false);
-    const [url, setUrl] = useState("");
-    const [anonKey, setAnonKey] = useState("");
+    const { user } = useAuth();
+    const { settings, updateSettings } = useUserSettings();
+    const [useCustom, setUseCustom] = useState(!settings.useDefaultSupabase);
+    const [url, setUrl] = useState(settings.customSupabaseUrl);
+    const [anonKey, setAnonKey] = useState(settings.customSupabaseAnonKey);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    useEffect(() => {
+        setUseCustom(!settings.useDefaultSupabase);
+        setUrl(settings.customSupabaseUrl);
+        setAnonKey(settings.customSupabaseAnonKey);
+    }, [
+        settings.customSupabaseAnonKey,
+        settings.customSupabaseUrl,
+        settings.useDefaultSupabase,
+    ]);
 
     const handleFinish = async () => {
         setLoading(true);
         setError(null);
         try {
+            if (!user?.id) {
+                throw new Error("You need to be signed in to finish onboarding");
+            }
+            if (!settings.transactionEmail?.trim()) {
+                throw new Error(
+                    "Please provide a transaction email before continuing"
+                );
+            }
+            const trimmedUrl = url.trim();
+            const trimmedKey = anonKey.trim();
             if (useCustom) {
-                if (!url || !anonKey) {
+                if (!trimmedUrl || !trimmedKey) {
                     throw new Error("Please provide both URL and API key");
                 }
-                setSupabaseConfig({ url, anonKey });
-            } else {
-                setSupabaseConfig({
-                    url: DEFAULT_SUPABASE_URL,
-                    anonKey: DEFAULT_SUPABASE_ANON_KEY,
+                await updateSettings({
+                    useDefaultSupabase: false,
+                    customSupabaseUrl: trimmedUrl,
+                    customSupabaseAnonKey: trimmedKey,
                 });
+                await upsertUserProfile(authSupabase, user.id, {
+                    transaction_email: settings.transactionEmail,
+                    use_default_supabase: false,
+                    custom_supabase_url: trimmedUrl,
+                    custom_supabase_anon_key: trimmedKey,
+                    notifications_enabled: settings.notificationsEnabled,
+                });
+                setDataSupabaseConfig({ url: trimmedUrl, anonKey: trimmedKey });
+            } else {
+                await updateSettings({
+                    useDefaultSupabase: true,
+                    customSupabaseUrl: "",
+                    customSupabaseAnonKey: "",
+                });
+                await upsertUserProfile(authSupabase, user.id, {
+                    transaction_email: settings.transactionEmail,
+                    use_default_supabase: true,
+                    custom_supabase_url: null,
+                    custom_supabase_anon_key: null,
+                    notifications_enabled: settings.notificationsEnabled,
+                });
+                setDataSupabaseConfig(defaultSupabaseConfig);
             }
             await completeOnboarding();
         } catch (err) {
