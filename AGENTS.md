@@ -48,7 +48,17 @@ All constants including the color scheme (purple highlights, black background, w
 -   Theme colors from config.js
 -   Minimal, clean UI
 
+## Structure of code
+
+-   Add anything developer have to do with the code into 'TODO.md' file. For example, if the Developer have to create a new table in Supabase, add the schema to the 'TODO.md' file together with further instructions.
+
 ## To-dos
 
--   When signing out, return to the sign in page.
--   For the sign up page, create another page that has a confirm password field too
+-   After sign up, for the onboarding, it gets the email used for transactions, whether they want default supabase account and/or the supabase account they will be using for transactions. It then uploads them to Supabase. So, add:
+    (1) "email" they will be using
+    (2) boolean whether they are using default
+    (3) alternate "supabase" url (optional)
+    (4) alternate "supabase" api key (optional)
+-   After signing in, it does not have to onboard fully. Only onboard when signing up. The email for transactions should be there already. So it does a Supabase check for the most updated email. Check if they use their own supabase account. If yes, get it and initialise the variables for adding categories and transactions to that. Only have push_notifications turned on, that's all.
+-   In the profile screen, add an button to change email used for transactions AKA update supabase.
+-   Also, create a readme file called 'TODO.md' with all the things I should do to run the app including the schema for new database to add
