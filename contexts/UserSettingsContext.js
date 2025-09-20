@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
 const STORAGE_KEY = "userSettings";
 
@@ -33,11 +33,14 @@ export const UserSettingsProvider = ({ children }) => {
         load();
     }, []);
 
-    const updateSettings = async (updates) => {
-        const next = { ...settings, ...updates };
-        setSettings(next);
+    const updateSettings = useCallback(async (updates) => {
+        let next;
+        setSettings((prev) => {
+            next = { ...prev, ...updates };
+            return next;
+        });
         await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    };
+    }, []);
 
     return (
         <UserSettingsContext.Provider value={{ settings, loading, updateSettings }}>
