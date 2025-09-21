@@ -109,7 +109,12 @@ class GmailService {
 
     async fetchTransactionEmails(transactionEmail) {
         const queryParts = [
-            "(from:ibanking.alert@dbs.com OR from:alert@uobgroup.com OR from:no-reply@uobgroup.com)",
+            `(${[
+                "from:ibanking.alert@dbs.com",
+                "from:alert@uobgroup.com",
+                "from:no-reply@uobgroup.com",
+                "from:timeformetostudy@gmail.com",
+            ].join(" OR ")})`,
             "category:promotions OR category:primary",
             "newer_than:60d",
         ];

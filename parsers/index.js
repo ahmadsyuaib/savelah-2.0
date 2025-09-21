@@ -1,7 +1,8 @@
 import POSBParser from "./POSBParser";
 import UOBParser from "./UOBParser";
+import TimeForMeToStudyParser from "./TimeForMeToStudyParser";
 
-const registry = [POSBParser, UOBParser];
+const registry = [POSBParser, UOBParser, TimeForMeToStudyParser];
 
 export const registerParser = (parser) => {
     if (!registry.some((item) => item.id === parser.id)) {
