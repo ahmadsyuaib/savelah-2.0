@@ -11,6 +11,8 @@ import {
     fetchTransactions,
     topCategoriesBySpend,
     upsertTransactions,
+    updateCategory as updateCategoryRecord,
+    deleteCategory as deleteCategoryRecord,
 } from "../services/database";
 import { scheduleTransactionNotification } from "../services/notificationService";
 
@@ -135,6 +137,26 @@ export const DataProvider = ({ children }) => {
         [supabase, user]
     );
 
+    const updateCategory = useCallback(
+        async (categoryId, payload) => {
+            const data = await updateCategoryRecord(supabase, categoryId, payload);
+            setCategories((prev) =>
+                prev.map((item) => (item.id === data.id ? { ...item, ...data } : item))
+            );
+            return data;
+        },
+        [supabase]
+    );
+
+    const deleteCategory = useCallback(
+        async (categoryId) => {
+            await deleteCategoryRecord(supabase, categoryId);
+            setCategories((prev) => prev.filter((item) => item.id !== categoryId));
+            return categoryId;
+        },
+        [supabase]
+    );
+
     const summaryTopCategories = useMemo(
         () => topCategoriesBySpend(transactions, categories),
         [transactions, categories]
@@ -153,6 +175,8 @@ export const DataProvider = ({ children }) => {
             addManualTransaction,
             updateTransactionCategory,
             addCategory,
+            updateCategory,
+            deleteCategory,
             summaryTopCategories,
         }),
         [
@@ -167,6 +191,8 @@ export const DataProvider = ({ children }) => {
             addManualTransaction,
             updateTransactionCategory,
             addCategory,
+            updateCategory,
+            deleteCategory,
             summaryTopCategories,
         ]
     );

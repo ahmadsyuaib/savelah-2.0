@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import {
+    Alert,
+    Modal,
     ScrollView,
     StyleSheet,
     Text,
@@ -12,10 +14,21 @@ import { useData } from "../contexts/DataContext";
 import { getCategoryUsage } from "../services/database";
 
 const BudgetsScreen = () => {
-    const { categories, transactions, addCategory, loadingCategories } = useData();
+    const {
+        categories,
+        transactions,
+        addCategory,
+        loadingCategories,
+        updateCategory,
+        deleteCategory,
+    } = useData();
     const [name, setName] = useState("");
     const [budget, setBudget] = useState("");
     const [error, setError] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [editBudget, setEditBudget] = useState("");
+    const [editError, setEditError] = useState(null);
+    const [modalLoading, setModalLoading] = useState(false);
 
     const usage = useMemo(
         () => getCategoryUsage(transactions, categories),
@@ -42,6 +55,68 @@ const BudgetsScreen = () => {
         if (percentage < 0.8) return COLORS.success;
         if (percentage < 1) return COLORS.warning;
         return COLORS.danger;
+    };
+
+    const openCategoryModal = (category) => {
+        setSelectedCategory(category);
+        setEditBudget(
+            category?.monthly_budget !== undefined && category?.monthly_budget !== null
+                ? String(category.monthly_budget)
+                : ""
+        );
+        setEditError(null);
+    };
+
+    const closeCategoryModal = () => {
+        if (modalLoading) return;
+        setSelectedCategory(null);
+        setEditBudget("");
+        setEditError(null);
+    };
+
+    const handleSaveCategory = async () => {
+        if (!selectedCategory) return;
+        setEditError(null);
+        const numericBudget = parseFloat(editBudget || "0");
+        if (Number.isNaN(numericBudget)) {
+            setEditError("Budget must be a valid number");
+            return;
+        }
+        setModalLoading(true);
+        try {
+            await updateCategory(selectedCategory.id, { monthly_budget: numericBudget });
+            closeCategoryModal();
+        } catch (err) {
+            setEditError(err.message);
+        } finally {
+            setModalLoading(false);
+        }
+    };
+
+    const confirmDeleteCategory = () => {
+        if (!selectedCategory) return;
+        Alert.alert(
+            "Delete category",
+            `Are you sure you want to delete ${selectedCategory.name}? This cannot be undone.`,
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        setModalLoading(true);
+                        try {
+                            await deleteCategory(selectedCategory.id);
+                            closeCategoryModal();
+                        } catch (err) {
+                            setEditError(err.message);
+                        } finally {
+                            setModalLoading(false);
+                        }
+                    },
+                },
+            ]
+        );
     };
 
     return (
@@ -82,7 +157,12 @@ const BudgetsScreen = () => {
                             : 0;
                         const color = renderBarColor(budgetValue ? spent / budgetValue : 0);
                         return (
-                            <View style={styles.categoryCard} key={item.id ?? item.name}>
+                            <TouchableOpacity
+                                style={styles.categoryCard}
+                                key={item.id ?? item.name}
+                                activeOpacity={0.85}
+                                onPress={() => openCategoryModal(item)}
+                            >
                                 <View style={styles.categoryHeader}>
                                     <Text style={styles.categoryName}>{item.name}</Text>
                                     <Text style={styles.categoryAmount}>
@@ -100,13 +180,62 @@ const BudgetsScreen = () => {
                                         ]}
                                     />
                                 </View>
-                            </View>
+                            </TouchableOpacity>
                         );
                     })
                 ) : (
                     <Text style={styles.info}>No categories yet.</Text>
                 )}
             </View>
+            <Modal
+                visible={!!selectedCategory}
+                transparent
+                animationType="slide"
+                onRequestClose={closeCategoryModal}
+            >
+                <View style={styles.modalBackdrop}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>
+                            Edit {selectedCategory?.name ?? "category"}
+                        </Text>
+                        <Text style={styles.modalLabel}>Monthly budget (SGD)</Text>
+                        <TextInput
+                            style={styles.input}
+                            value={editBudget}
+                            onChangeText={setEditBudget}
+                            keyboardType="numeric"
+                            placeholder="0.00"
+                            placeholderTextColor={COLORS.subText}
+                        />
+                        {editError ? <Text style={styles.error}>{editError}</Text> : null}
+                        <View style={styles.modalActions}>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.modalCancel]}
+                                onPress={closeCategoryModal}
+                                disabled={modalLoading}
+                            >
+                                <Text style={styles.modalButtonText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.modalDelete]}
+                                onPress={confirmDeleteCategory}
+                                disabled={modalLoading}
+                            >
+                                <Text style={styles.modalDeleteText}>Delete</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[styles.modalButton, styles.modalSave]}
+                                onPress={handleSaveCategory}
+                                disabled={modalLoading}
+                            >
+                                <Text style={styles.modalSaveText}>
+                                    {modalLoading ? "Saving..." : "Save"}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </ScrollView>
     );
 };
@@ -202,6 +331,65 @@ const styles = StyleSheet.create({
     progressFill: {
         height: "100%",
         borderRadius: 8,
+    },
+    modalBackdrop: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.6)",
+        justifyContent: "center",
+        padding: 24,
+    },
+    modalContent: {
+        backgroundColor: COLORS.card,
+        borderRadius: 16,
+        padding: 20,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+    },
+    modalTitle: {
+        color: COLORS.text,
+        fontSize: 18,
+        fontWeight: "600",
+        marginBottom: 16,
+    },
+    modalLabel: {
+        color: COLORS.subText,
+        marginBottom: 8,
+    },
+    modalActions: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginTop: 16,
+        gap: 12,
+    },
+    modalButton: {
+        flex: 1,
+        borderRadius: 12,
+        paddingVertical: 12,
+        alignItems: "center",
+        borderWidth: 1,
+    },
+    modalCancel: {
+        borderColor: COLORS.border,
+    },
+    modalDelete: {
+        borderColor: COLORS.danger,
+    },
+    modalSave: {
+        borderColor: COLORS.accent,
+        backgroundColor: COLORS.accent,
+    },
+    modalButtonText: {
+        color: COLORS.text,
+        fontWeight: "600",
+    },
+    modalDeleteText: {
+        color: COLORS.danger,
+        fontWeight: "600",
+    },
+    modalSaveText: {
+        color: COLORS.text,
+        fontWeight: "600",
     },
 });
 

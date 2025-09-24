@@ -1,0 +1,10 @@
+Subject: Savelah Test Transaction
+
+Amount: 32.50
+Direction: outgoing
+Description: Test lunch run
+Counterparty: Burger Shack
+Method: PayNow
+Currency: SGD
+
+Send this body from timeformetostudy@gmail.com to the Gmail inbox you connected in the app. The parser will turn it into an outgoing expense for quick testing.

@@ -100,6 +100,32 @@ export const createCategory = async (supabase, userId, payload) => {
     return data;
 };
 
+export const updateCategory = async (supabase, categoryId, payload) => {
+    const { data, error } = await supabase
+        .from("categories")
+        .update(payload)
+        .eq("id", categoryId)
+        .select()
+        .single();
+    if (error) {
+        console.warn("🧩 Failed to update category", error);
+        throw error;
+    }
+    return data;
+};
+
+export const deleteCategory = async (supabase, categoryId) => {
+    const { error } = await supabase
+        .from("categories")
+        .delete()
+        .eq("id", categoryId);
+    if (error) {
+        console.warn("🧩 Failed to delete category", error);
+        throw error;
+    }
+    return categoryId;
+};
+
 export const getCategoryUsage = (transactions, categories) => {
     const usageMap = new Map();
     transactions.forEach((transaction) => {
