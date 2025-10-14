@@ -19,6 +19,14 @@
    ```
    Then follow the Expo CLI instructions to open the app on a simulator or Expo Go.
 4. Ensure push notifications are enabled on your device/emulator so onboarding can register for alerts.
+5. To open the project directly on an iOS simulator or Android emulator, first start the emulator and then run one of:
+   ```bash
+   npm run ios
+   npm run android
+   ```
+   These commands wrap Expo's platform-specific shortcuts (`expo start --ios` / `--android`).
+6. When testing on a physical device, install the Expo Go app, ensure the device and your computer share the same network, and scan the QR code printed by `npm start`.
+7. For a production-ready binary, configure EAS credentials and run `npx expo run:ios` or `npx expo run:android` to generate native builds based on the latest code.
 
 ## Supabase setup
 
