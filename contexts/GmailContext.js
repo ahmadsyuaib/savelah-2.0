@@ -89,9 +89,25 @@ export const useGmail = () => {
 };
 
 const createPKCECodes = async () => {
-    const codeVerifier = await AuthSession.generateRandomAsync(128);
+    const codeVerifier = generateCodeVerifier();
     const codeChallenge = await deriveCodeChallenge(codeVerifier);
     return { codeVerifier, codeChallenge };
+};
+
+const PKCE_CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+
+const generateCodeVerifier = (length = 128) => {
+    const randomBytes = new Uint8Array(length);
+    try {
+        Crypto.getRandomValues(randomBytes);
+    } catch (error) {
+        for (let index = 0; index < length; index += 1) {
+            randomBytes[index] = Math.floor(Math.random() * 256);
+        }
+    }
+    return Array.from(randomBytes)
+        .map((byte) => PKCE_CHARSET[byte % PKCE_CHARSET.length])
+        .join("");
 };
 
 const deriveCodeChallenge = async (codeVerifier) => {
