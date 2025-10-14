@@ -43,6 +43,7 @@
      with check (auth.uid() = user_id);
    ```
 3. The existing `transactions` and `categories` tables should continue to run on either the default Supabase instance or a custom instance configured by the user during onboarding.
+4. After applying the base schema, run the statements in `toAddDatabase.sql` to install helper functions (summary aggregations and the trigger that keeps `user_settings.updated_at` in sync).
 
 ## Gmail email interception setup
 

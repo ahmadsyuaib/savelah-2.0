@@ -130,7 +130,13 @@ class GmailService {
         );
 
         const parsed = detailed
-            .map((email) => ({ email, transaction: parseEmail(email) }))
+            .map((email) => {
+                console.log(
+                    "📧 Full Gmail message received:",
+                    JSON.stringify(email, null, 2)
+                );
+                return { email, transaction: parseEmail(email) };
+            })
             .filter(({ transaction }) => transaction && transaction.amount > 0)
             .map(({ email, transaction }) => ({
                 ...transaction,
